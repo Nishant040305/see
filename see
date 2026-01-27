@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""
+SEE - CLI Command Helper
+Main entry point for the application.
+"""
+
+import sys
+from pathlib import Path
+
+# Import from same directory
+from config import COMMANDS_FILE
+from storage import CommandStorage
+from manager import CommandManager
+from executor import CommandExecutor
+from printer import CommandPrinter
+from cli import CLI
+from parser import create_parser, parse_add_syntax, print_help
+from installer import handle_install
+
+
+def main():
+    """Main entry point."""
+    # Initialize components
+    storage = CommandStorage(COMMANDS_FILE)
+    manager = CommandManager(storage)
+    executor = CommandExecutor()
+    printer = CommandPrinter()
+    cli = CLI(manager, executor, printer)
+    
+    # Check if this is a subcommand
+    subcommands = ['search', 'list', 'show', 'run', 'delete', 'stats', 'install']
+    
+    if len(sys.argv) > 1 and sys.argv[1] in subcommands:
+        # Handle subcommands
+        parser = create_parser()
+        args = parser.parse_args()
+        
+        if args.command == 'search':
+            cli.handle_search(query=args.query, tags=args.tags)
+        elif args.command == 'list':
+            cli.handle_list(tags=args.tags, limit=args.limit)
+        elif args.command == 'show':
+            cli.handle_show(args.id, copy_to_clipboard=args.copy)
+        elif args.command == 'run':
+            cli.handle_run(args.id, dry_run=args.dry_run, shell_mode=not args.verbose)
+        elif args.command == 'delete':
+            cli.handle_delete(args.id)
+        elif args.command == 'stats':
+            cli.handle_stats()
+        elif args.command == 'install':
+            # Get the path to this script for the installer
+            script_path = str(Path(__file__).resolve())
+            handle_install(args.shell, script_path)
+    else:
+        # Parse add syntax
+        result = parse_add_syntax(sys.argv[1:])
+        
+        if result is None:
+            print_help()
+        elif result.get('help'):
+            print_help()
+        else:
+            cli.handle_add(
+                description=result['description'],
+                tags=result['tags'],
+                command=result['command'],
+                save_only=result['save_only'],
+                silent=True,
+                shell_mode=result.get('shell_mode', False)
+            )
+
+
+if __name__ == '__main__':
+    main()
