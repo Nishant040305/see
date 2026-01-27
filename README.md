@@ -1,6 +1,6 @@
 # SEE - CLI Command Helper
 
-A simple, powerful tool to save, search, and manage your frequently used CLI commands.
+A simple, powerful tool to save, search, and manage your frequently used CLI commands.(support Linux currently)
 
 ## Features
 
