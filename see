@@ -36,7 +36,8 @@ def main():
         args = parser.parse_args()
         
         if args.command == 'search':
-            cli.handle_search(query=args.query, tags=args.tags)
+            query = ' '.join(args.query) if args.query else None
+            cli.handle_search(query=query, tags=args.tags)
         elif args.command == 'list':
             cli.handle_list(tags=args.tags, limit=args.limit)
         elif args.command == 'show':

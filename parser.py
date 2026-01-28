@@ -77,7 +77,7 @@ def create_parser() -> argparse.ArgumentParser:
     
     # Search command
     search_parser = subparsers.add_parser('search', help='Search commands')
-    search_parser.add_argument('query', nargs='?', help='Search query')
+    search_parser.add_argument('query', nargs='*', help='Search query')
     search_parser.add_argument('-t', '--tags', nargs='+', help='Filter by tags')
     
     # List command
