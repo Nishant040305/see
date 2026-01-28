@@ -104,8 +104,7 @@ class CLI:
         if limit:
             commands = commands[:limit]
         
-        for cmd in commands:
-            self.printer.print_command(cmd)
+        self.printer.print_table(commands)
     
     def handle_show(self, cmd_id: int, copy_to_clipboard: bool = False):
         """Handle showing a specific command."""
@@ -134,10 +133,10 @@ class CLI:
         """Handle editing a command."""
         cmd = self.manager.edit(cmd_id, description, tags)
         if cmd:
-            print(f" Command {cmd_id} updated.")
+            print(f"Command {cmd_id} updated.")
             self.printer.print_command(cmd)
         else:
-            print(f" Command {cmd_id} not found.")
+            print(f"Command {cmd_id} not found.")
     
     def handle_stats(self):
         """Handle showing statistics."""
