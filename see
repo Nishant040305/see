@@ -43,7 +43,7 @@ def main():
         elif args.command == 'show':
             cli.handle_show(args.id, copy_to_clipboard=args.copy)
         elif args.command == 'run':
-            cli.handle_run(args.id, dry_run=args.dry_run, shell_mode=not args.verbose)
+            cli.handle_run(args.id, dry_run=args.dry_run, shell_mode=not args.verbose, args=args.args)
         elif args.command == 'delete':
             cli.handle_delete(args.id)
         elif args.command == 'edit':

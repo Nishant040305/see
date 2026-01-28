@@ -95,6 +95,7 @@ def create_parser() -> argparse.ArgumentParser:
     # Run command
     run_parser = subparsers.add_parser('run', help='Execute a saved command by ID')
     run_parser.add_argument('id', type=int, help='Command ID to execute')
+    run_parser.add_argument('args', nargs='*', help='Values for {{placeholders}} in order')
     run_parser.add_argument('--dry-run', action='store_true', help='Show what would be executed without running')
     run_parser.add_argument('-v', '--verbose', action='store_true', help='Show execution details (disable shell integration)')
     

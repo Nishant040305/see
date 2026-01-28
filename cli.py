@@ -46,25 +46,45 @@ class CLI:
                         print(f"\n Command exited with code {code}", file=sys.stderr)
     
     def handle_run(self, cmd_id: int, dry_run: bool = False, 
-                   silent: bool = False, shell_mode: bool = False):
+                   silent: bool = False, shell_mode: bool = False,
+                   args: Optional[List[str]] = None):
         """Handle running a saved command."""
+        from variables import find_placeholders, substitute_positional, prompt_for_values, substitute
+        
         cmd = self.manager.get(cmd_id)
         if not cmd:
             print(f"✗ Command {cmd_id} not found.", file=sys.stderr)
             return False
         
+        command = cmd['command']
+        
+        # Handle placeholders
+        placeholders = find_placeholders(command)
+        if placeholders:
+            if args:
+                # Use positional args
+                command = substitute_positional(command, args)
+            else:
+                # Prompt for values
+                print(f"Command has placeholders: {', '.join(placeholders)}", file=sys.stderr)
+                values = prompt_for_values(placeholders)
+                if not values:
+                    print("Cancelled.", file=sys.stderr)
+                    return False
+                command = substitute(command, values)
+        
         if shell_mode:
             # Print command for shell wrapper to evaluate
-            print(cmd['command'])
+            print(command)
             self.manager.increment_usage(cmd_id)
             return True
         
         if dry_run:
             if not silent:
-                print("(Dry run - command not executed)", file=sys.stderr)
+                print(f"(Dry run) Would execute: {command}", file=sys.stderr)
             return True
         
-        success, code = self.executor.execute(cmd['command'])
+        success, code = self.executor.execute(command)
         
         if success:
             self.manager.increment_usage(cmd_id)
