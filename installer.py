@@ -20,9 +20,8 @@ see() {{
         command {script_path} "$@"
     else
         # It's 'run' or the 'add' syntax (which implies execution)
-        # We capture the output and eval it. We pass --shell-mode to ensure
-        # the script only outputs the command to be executed.
-        local cmd_output=$(command {script_path} "$@" --shell-mode 2>/dev/null)
+        # We capture the output and eval it
+        local cmd_output=$(command {script_path} "$@" 2>/dev/null)
         if [[ -n "$cmd_output" ]]; then
             eval "$cmd_output"
         fi
@@ -40,7 +39,7 @@ function see
         command {script_path} $argv
     else
         # Capture output and eval
-        set -l cmd_output (command {script_path} $argv --shell-mode 2>/dev/null)
+        set -l cmd_output (command {script_path} $argv 2>/dev/null)
         if test -n "$cmd_output"
             eval $cmd_output
         end

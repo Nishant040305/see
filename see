@@ -28,7 +28,7 @@ def main():
     cli = CLI(manager, executor, printer)
     
     # Check if this is a subcommand
-    subcommands = ['search', 'list', 'show', 'run', 'delete', 'stats', 'install']
+    subcommands = ['search', 'list', 'show', 'run', 'delete', 'stats', 'install', 'edit']
     
     if len(sys.argv) > 1 and sys.argv[1] in subcommands:
         # Handle subcommands
@@ -42,10 +42,11 @@ def main():
         elif args.command == 'show':
             cli.handle_show(args.id, copy_to_clipboard=args.copy)
         elif args.command == 'run':
-            shell_mode = getattr(args, 'shell_mode', False) or not args.verbose
-            cli.handle_run(args.id, dry_run=args.dry_run, shell_mode=shell_mode)
+            cli.handle_run(args.id, dry_run=args.dry_run, shell_mode=not args.verbose)
         elif args.command == 'delete':
             cli.handle_delete(args.id)
+        elif args.command == 'edit':
+            cli.handle_edit(args.id, description=args.description, tags=args.tags)
         elif args.command == 'stats':
             cli.handle_stats()
         elif args.command == 'install':
@@ -56,7 +57,7 @@ def main():
         # Parse add syntax
         result = parse_add_syntax(sys.argv[1:])
         if result is None:
-            print_help()
+            print_help(file=sys.stderr)
         elif result.get('help'):
             print_help()
         else:

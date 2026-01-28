@@ -49,7 +49,7 @@ def parse_add_syntax(args_list: List[str]) -> Optional[Dict]:
             command_parts = args_list[i:]
             break
     
-    if description:
+    if description is not None:
         if not command_parts:
             print("Error: No command specified.", file=sys.stderr)
             print("Usage: see -d 'description' -t tag1 tag2 -c <command>", file=sys.stderr)
@@ -95,11 +95,16 @@ def create_parser() -> argparse.ArgumentParser:
     run_parser.add_argument('id', type=int, help='Command ID to execute')
     run_parser.add_argument('--dry-run', action='store_true', help='Show what would be executed without running')
     run_parser.add_argument('-v', '--verbose', action='store_true', help='Show execution details (disable shell integration)')
-    run_parser.add_argument('--shell-mode', action='store_true', help=argparse.SUPPRESS)
     
     # Delete command
     delete_parser = subparsers.add_parser('delete', help='Delete a command by ID')
     delete_parser.add_argument('id', type=int, help='Command ID to delete')
+
+    # Edit command
+    edit_parser = subparsers.add_parser('edit', help='Edit a command by ID')
+    edit_parser.add_argument('id', type=int, help='Command ID to edit')
+    edit_parser.add_argument('-d', '--description', help='New description')
+    edit_parser.add_argument('-t', '--tags', nargs='+', help='New tags (replaces existing)')
     
     # Stats command
     stats_parser = subparsers.add_parser('stats', help='Show statistics')
@@ -112,7 +117,7 @@ def create_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def print_help():
+def print_help(file=sys.stdout):
     """Print help message."""
     help_text = """
 SEE - CLI Command Helper: Save and search your CLI commands
@@ -130,6 +135,7 @@ Usage:
   see show <id>
   see show <id> -c #to copy to clipboard
   see run <id> [--dry-run]
+  see edit <id> [-d description] [-t tags]
   see delete <id>
   see stats
   see install [bash|zsh|fish]
@@ -160,4 +166,4 @@ Shell Integration:
   Run 'see install' to set up shell integration. This allows commands like
   'export' to affect your current shell session.
 """
-    print(help_text)
+    print(help_text, file=file)

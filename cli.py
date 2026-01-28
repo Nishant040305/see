@@ -21,7 +21,11 @@ class CLI:
         cmd = self.manager.add(command, description, tags)
         
         if not silent:
-            print(f" Command saved with ID: {cmd['id']}", file=sys.stderr)
+            if cmd.get('updated'):
+                action = "Merged tags for" if cmd.get('merged_tags') else "Already exists:"
+                print(f"ℹ {action} command ID: {cmd['id']}", file=sys.stderr)
+            else:
+                print(f"✓ Command saved with ID: {cmd['id']}", file=sys.stderr)
         
         # Execute unless --save-only flag is set
         if not save_only:
@@ -123,6 +127,15 @@ class CLI:
         """Handle deleting a command."""
         if self.manager.delete(cmd_id):
             print(f" Command {cmd_id} deleted.")
+        else:
+            print(f" Command {cmd_id} not found.")
+
+    def handle_edit(self, cmd_id: int, description: Optional[str] = None, tags: Optional[List[str]] = None):
+        """Handle editing a command."""
+        cmd = self.manager.edit(cmd_id, description, tags)
+        if cmd:
+            print(f" Command {cmd_id} updated.")
+            self.printer.print_command(cmd)
         else:
             print(f" Command {cmd_id} not found.")
     

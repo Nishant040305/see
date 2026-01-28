@@ -13,7 +13,21 @@ class CommandManager:
         self.commands = self.storage.load()
     
     def add(self, command: str, description: str, tags: List[str]) -> Dict:
-        """Add a new command to the collection."""
+        """Add a new command to the collection or update existing if found."""
+        command = command.strip()
+        
+        # Check for existing command
+        existing = self._find_by_command(command)
+        if existing:
+            # Merge tags
+            existing_tags = set(existing['tags'])
+            new_tags = set(tags)
+            if not new_tags.issubset(existing_tags):
+                existing['tags'] = sorted(list(existing_tags.union(new_tags)))
+                self.storage.save(self.commands)
+                return {**existing, 'updated': True, 'merged_tags': True}
+            return {**existing, 'updated': False, 'merged_tags': False}
+
         new_command = {
             'id': self._get_next_id(),
             'command': command,
@@ -25,6 +39,34 @@ class CommandManager:
         self.commands.append(new_command)
         self.storage.save(self.commands)
         return new_command
+
+    def edit(self, cmd_id: int, description: Optional[str] = None, tags: Optional[List[str]] = None) -> Optional[Dict]:
+        """Edit an existing command."""
+        cmd = self.get(cmd_id)
+        if not cmd:
+            return None
+        
+        updated = False
+        if description:
+            cmd['description'] = description
+            updated = True
+            
+        if tags is not None:
+            # For edit, we replace tags
+            cmd['tags'] = tags
+            updated = True
+            
+        if updated:
+            self.storage.save(self.commands)
+            
+        return cmd
+
+    def _find_by_command(self, command_str: str) -> Optional[Dict]:
+        """Find a command by its command string."""
+        for cmd in self.commands:
+            if cmd['command'].strip() == command_str:
+                return cmd
+        return None
     
     def _get_next_id(self) -> int:
         """Get the next available ID."""

@@ -54,9 +54,8 @@ see() {
         command $SEE_SCRIPT "\$@"
     else
         # It's 'run' or the 'add' syntax (which implies execution)
-        # We capture the output and eval it. We pass --shell-mode to ensure
-        # the script only outputs the command to be executed.
-        local cmd_output=\$(command $SEE_SCRIPT "\$@" --shell-mode 2>/dev/null)
+        # We capture the output and eval it
+        local cmd_output=\$(command $SEE_SCRIPT "\$@" 2>/dev/null)
         if [[ -n "\$cmd_output" ]]; then
             eval "\$cmd_output"
         fi
