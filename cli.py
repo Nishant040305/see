@@ -59,10 +59,6 @@ class CLI:
             self.manager.increment_usage(cmd_id)
             return True
         
-        if not silent:
-            print(f"\n Running: {cmd['description']}", file=sys.stderr)
-            print(f"   Command: {cmd['command']}\n", file=sys.stderr)
-        
         if dry_run:
             if not silent:
                 print("(Dry run - command not executed)", file=sys.stderr)
@@ -72,13 +68,6 @@ class CLI:
         
         if success:
             self.manager.increment_usage(cmd_id)
-        
-        if not silent:
-            if success:
-                print(f"\n Command completed successfully", file=sys.stderr)
-            else:
-                print(f"\n Command exited with code {code}", file=sys.stderr)
-        
         return success
     
     def handle_search(self, query: Optional[str] = None, tags: Optional[List[str]] = None):
@@ -90,7 +79,7 @@ class CLI:
         else:
             print("No commands found matching your search.")
     
-    def handle_list(self, tags: Optional[List[str]] = None, limit: Optional[int] = None):
+    def handle_list(self, tags: Optional[List[str]] = None, limit: Optional[int] = None, sort: str = 'created'):
         """Handle listing commands."""
         commands = self.manager.search(tags=tags)
         
@@ -98,8 +87,13 @@ class CLI:
             print("No commands found.")
             return
         
-        # Sort by most recently created
-        commands = sorted(commands, key=lambda x: x.get('created_at', ''), reverse=True)
+        # Apply sorting
+        if sort == 'recent':
+            commands = sorted(commands, key=lambda x: x.get('last_used_at', ''), reverse=True)
+        elif sort == 'used':
+            commands = sorted(commands, key=lambda x: x.get('used_count', 0), reverse=True)
+        else:  # created (default)
+            commands = sorted(commands, key=lambda x: x.get('created_at', ''), reverse=True)
         
         if limit:
             commands = commands[:limit]
@@ -150,3 +144,94 @@ class CLI:
         """Handle showing statistics."""
         stats = self.manager.get_stats()
         self.printer.print_stats(stats)
+
+    def handle_tags(self):
+        """Handle listing all tags with counts."""
+        tag_counts = self.manager.get_all_tags()
+        if not tag_counts:
+            print("No tags found.")
+            return
+        
+        # Sort by count (descending), then alphabetically
+        sorted_tags = sorted(tag_counts.items(), key=lambda x: (-x[1], x[0]))
+        
+        print("\nTags:")
+        print("-" * 30)
+        for tag, count in sorted_tags:
+            print(f"  {tag} ({count})")
+
+    def handle_interactive(self, shell_mode: bool = False):
+        """Handle interactive command selection."""
+        from tui import interactive_select
+        
+        commands = self.manager.search()  # Get all commands
+        if not commands:
+            print("No commands found.")
+            return
+        
+        # Sort by most recently used
+        commands = sorted(commands, key=lambda x: x.get('last_used_at', ''), reverse=True)
+        
+        selected_id = interactive_select(commands)
+        if selected_id is not None:
+            # Always execute directly (not shell_mode) since curses interferes with shell capture
+            self.handle_run(selected_id, shell_mode=False)
+
+    def handle_import(self, from_history: bool = False, lines: int = 50, 
+                     file_path: Optional[str] = None, no_filter: bool = False):
+        """Handle importing commands from history or file."""
+        from importer import get_history_file, read_history, filter_trivial
+        from pathlib import Path
+        
+        # Determine source
+        if file_path:
+            source = Path(file_path)
+            if not source.exists():
+                print(f"File not found: {file_path}")
+                return
+        elif from_history:
+            source = get_history_file()
+            if not source:
+                print("Could not find shell history file.")
+                return
+            print(f"Reading from: {source}")
+        else:
+            print("Please specify --history or --file")
+            return
+        
+        # Read commands
+        commands = read_history(source, lines)
+        if not commands:
+            print("No commands found in history.")
+            return
+        
+        # Filter trivial commands
+        if not no_filter:
+            commands = filter_trivial(commands)
+        
+        if not commands:
+            print("No interesting commands found after filtering.")
+            return
+        
+        print(f"\nFound {len(commands)} commands to import:")
+        print("-" * 40)
+        
+        imported = 0
+        skipped = 0
+        
+        for cmd in commands:
+            # Print first 60 chars of command
+            display = cmd[:60] + "..." if len(cmd) > 60 else cmd
+            
+            # Try to add (will dedupe automatically)
+            result = self.manager.add(cmd, "", [])
+            
+            if result.get('updated', True):  # Already existed
+                skipped += 1
+                print(f"  SKIP: {display}")
+            else:
+                imported += 1
+                print(f"  ADD:  {display}")
+        
+        print("-" * 40)
+        print(f"Imported: {imported}, Skipped (exists): {skipped}")

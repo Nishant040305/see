@@ -12,7 +12,7 @@ def get_shell_wrapper(shell: str, script_path: str) -> str:
         return f'''# SEE Command Helper - Shell Integration
 see() {{
     # List of subcommands and flags that just show information (don't need eval)
-    local info_cmds=" list search show delete stats install help -h --help "
+    local info_cmds=" list search show delete stats install help -h --help interactive import i tags "
     
     # Check if the first argument is empty or one of these info commands/flags
     if [[ $# -eq 0 ]] || [[ " $info_cmds " =~ " $1 " ]]; then
@@ -32,7 +32,7 @@ see() {{
         return f'''# SEE Command Helper - Shell Integration
 function see
     # List of subcommands and flags that just show information
-    set -l info_cmds list search show delete stats install help -h --help
+    set -l info_cmds list search show delete stats install help -h --help interactive import i tags
     
     if test (count $argv) -eq 0; or contains -- $argv[1] $info_cmds
         # Just run normally

@@ -84,6 +84,8 @@ def create_parser() -> argparse.ArgumentParser:
     list_parser = subparsers.add_parser('list', help='List all commands')
     list_parser.add_argument('-t', '--tags', nargs='+', help='Filter by tags')
     list_parser.add_argument('-n', '--limit', type=int, help='Limit number of results')
+    list_parser.add_argument('-s', '--sort', choices=['created', 'recent', 'used'], 
+                            default='created', help='Sort order: created (newest first), recent (last used), used (most used)')
     
     # Show command
     show_parser = subparsers.add_parser('show', help='Show a specific command by ID')
@@ -105,6 +107,19 @@ def create_parser() -> argparse.ArgumentParser:
     edit_parser.add_argument('id', type=int, help='Command ID to edit')
     edit_parser.add_argument('-d', '--description', help='New description')
     edit_parser.add_argument('-t', '--tags', nargs='+', help='New tags (replaces existing)')
+    
+    # Tags command
+    tags_parser = subparsers.add_parser('tags', help='List all tags with counts')
+    
+    # Interactive command
+    interactive_parser = subparsers.add_parser('interactive', aliases=['i'], help='Interactive command selector')
+    
+    # Import command
+    import_parser = subparsers.add_parser('import', help='Import commands from history')
+    import_parser.add_argument('--history', action='store_true', help='Import from shell history file')
+    import_parser.add_argument('--lines', type=int, default=50, help='Number of history lines to scan (default: 50)')
+    import_parser.add_argument('--file', type=str, help='Import from a specific file path')
+    import_parser.add_argument('--no-filter', action='store_true', help='Skip filtering trivial commands')
     
     # Stats command
     stats_parser = subparsers.add_parser('stats', help='Show statistics')

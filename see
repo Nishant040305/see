@@ -28,7 +28,7 @@ def main():
     cli = CLI(manager, executor, printer)
     
     # Check if this is a subcommand
-    subcommands = ['search', 'list', 'show', 'run', 'delete', 'stats', 'install', 'edit']
+    subcommands = ['search', 'list', 'show', 'run', 'delete', 'stats', 'install', 'edit', 'tags', 'interactive', 'i', 'import']
     
     if len(sys.argv) > 1 and sys.argv[1] in subcommands:
         # Handle subcommands
@@ -39,7 +39,7 @@ def main():
             query = ' '.join(args.query) if args.query else None
             cli.handle_search(query=query, tags=args.tags)
         elif args.command == 'list':
-            cli.handle_list(tags=args.tags, limit=args.limit)
+            cli.handle_list(tags=args.tags, limit=args.limit, sort=args.sort)
         elif args.command == 'show':
             cli.handle_show(args.id, copy_to_clipboard=args.copy)
         elif args.command == 'run':
@@ -48,8 +48,19 @@ def main():
             cli.handle_delete(args.id)
         elif args.command == 'edit':
             cli.handle_edit(args.id, description=args.description, tags=args.tags)
+        elif args.command == 'tags':
+            cli.handle_tags()
         elif args.command == 'stats':
             cli.handle_stats()
+        elif args.command in ['interactive', 'i']:
+            cli.handle_interactive(shell_mode=True)
+        elif args.command == 'import':
+            cli.handle_import(
+                from_history=args.history,
+                lines=args.lines,
+                file_path=args.file,
+                no_filter=args.no_filter
+            )
         elif args.command == 'install':
             # Get the path to this script for the installer
             script_path = str(Path(__file__).resolve())

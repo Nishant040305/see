@@ -118,10 +118,11 @@ class CommandManager:
         return results
     
     def increment_usage(self, cmd_id: int):
-        """Increment the usage count for a command."""
+        """Increment the usage count and update last_used_at for a command."""
         cmd = self.get(cmd_id)
         if cmd:
             cmd['used_count'] = cmd.get('used_count', 0) + 1
+            cmd['last_used_at'] = datetime.now().isoformat()
             self.storage.save(self.commands)
     
     def get_stats(self) -> Dict:
@@ -142,3 +143,11 @@ class CommandManager:
             'tags': sorted(all_tags),
             'most_used': [cmd for cmd in most_used if cmd.get('used_count', 0) > 0]
         }
+
+    def get_all_tags(self) -> Dict[str, int]:
+        """Get all unique tags with their usage counts."""
+        tag_counts = {}
+        for cmd in self.commands:
+            for tag in cmd.get('tags', []):
+                tag_counts[tag] = tag_counts.get(tag, 0) + 1
+        return tag_counts
