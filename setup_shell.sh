@@ -45,27 +45,21 @@ cat >> "$CONFIG_FILE" << EOF
 # SEE Command Helper - Shell Integration
 # Added by setup_shell.sh on $(date)
 see() {
-    # Check if this is a command that needs shell evaluation
-    if [[ "\$1" == "run" ]] || [[ "\$2" == "-c" ]] || [[ "\$2" == "--command" ]]; then
-        # Capture both stdout and check if we're in run mode
-        if [[ "\$1" == "run" ]]; then
-            # Get the command to execute
-            local cmd_output=\$(command $SEE_SCRIPT run "\${@:2}" --shell-mode 2>/dev/null)
-            if [[ -n "\$cmd_output" ]]; then
-                # Execute in current shell
-                eval "\$cmd_output"
-            fi
-        else
-            # For add commands, execute and capture
-            local cmd_output=\$(command $SEE_SCRIPT "\$@" --shell-mode 2>&1)
-            # The actual command will be on stdout, messages on stderr
-            if [[ -n "\$cmd_output" ]]; then
-                eval "\$cmd_output"
-            fi
-        fi
-    else
-        # For other subcommands, just run normally
+    # List of subcommands and flags that just show information (don't need eval)
+    local info_cmds=" list search show delete stats install help -h --help "
+    
+    # Check if the first argument is empty or one of these info commands/flags
+    if [[ \$# -eq 0 ]] || [[ " \$info_cmds " =~ " \$1 " ]]; then
+        # Just run normally
         command $SEE_SCRIPT "\$@"
+    else
+        # It's 'run' or the 'add' syntax (which implies execution)
+        # We capture the output and eval it. We pass --shell-mode to ensure
+        # the script only outputs the command to be executed.
+        local cmd_output=\$(command $SEE_SCRIPT "\$@" --shell-mode 2>/dev/null)
+        if [[ -n "\$cmd_output" ]]; then
+            eval "\$cmd_output"
+        fi
     fi
 }
 EOF

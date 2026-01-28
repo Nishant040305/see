@@ -11,17 +11,18 @@ def get_shell_wrapper(shell: str, script_path: str) -> str:
     if shell == 'bash' or shell == 'zsh':
         return f'''# SEE Command Helper - Shell Integration
 see() {{
-    # List of subcommands that just show information (don't need eval)
-    local info_cmds=" list search show delete stats install "
+    # List of subcommands and flags that just show information (don't need eval)
+    local info_cmds=" list search show delete stats install help -h --help "
     
-    # Check if the first argument is one of these info commands
-    if [[ " $info_cmds " =~ " $1 " ]]; then
+    # Check if the first argument is empty or one of these info commands/flags
+    if [[ $# -eq 0 ]] || [[ " $info_cmds " =~ " $1 " ]]; then
         # Just run normally
         command {script_path} "$@"
     else
         # It's 'run' or the 'add' syntax (which implies execution)
-        # We capture the output and eval it
-        local cmd_output=$(command {script_path} "$@")
+        # We capture the output and eval it. We pass --shell-mode to ensure
+        # the script only outputs the command to be executed.
+        local cmd_output=$(command {script_path} "$@" --shell-mode 2>/dev/null)
         if [[ -n "$cmd_output" ]]; then
             eval "$cmd_output"
         fi
@@ -31,15 +32,15 @@ see() {{
     elif shell == 'fish':
         return f'''# SEE Command Helper - Shell Integration
 function see
-    # List of subcommands that just show information
-    set -l info_cmds list search show delete stats install
+    # List of subcommands and flags that just show information
+    set -l info_cmds list search show delete stats install help -h --help
     
-    if contains -- $argv[1] $info_cmds
+    if test (count $argv) -eq 0; or contains -- $argv[1] $info_cmds
         # Just run normally
         command {script_path} $argv
     else
         # Capture output and eval
-        set -l cmd_output (command {script_path} $argv)
+        set -l cmd_output (command {script_path} $argv --shell-mode 2>/dev/null)
         if test -n "$cmd_output"
             eval $cmd_output
         end

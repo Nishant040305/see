@@ -42,7 +42,8 @@ def main():
         elif args.command == 'show':
             cli.handle_show(args.id, copy_to_clipboard=args.copy)
         elif args.command == 'run':
-            cli.handle_run(args.id, dry_run=args.dry_run, shell_mode=not args.verbose)
+            shell_mode = getattr(args, 'shell_mode', False) or not args.verbose
+            cli.handle_run(args.id, dry_run=args.dry_run, shell_mode=shell_mode)
         elif args.command == 'delete':
             cli.handle_delete(args.id)
         elif args.command == 'stats':
@@ -54,7 +55,6 @@ def main():
     else:
         # Parse add syntax
         result = parse_add_syntax(sys.argv[1:])
-        
         if result is None:
             print_help()
         elif result.get('help'):

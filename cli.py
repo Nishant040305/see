@@ -21,7 +21,7 @@ class CLI:
         cmd = self.manager.add(command, description, tags)
         
         if not silent:
-            print(f"✓ Command saved with ID: {cmd['id']}", file=sys.stderr)
+            print(f" Command saved with ID: {cmd['id']}", file=sys.stderr)
         
         # Execute unless --save-only flag is set
         if not save_only:
@@ -30,16 +30,16 @@ class CLI:
                 print(command)
             else:
                 if not silent:
-                    print(f"\n🚀 Running: {description}", file=sys.stderr)
+                    print(f"\n Running: {description}", file=sys.stderr)
                     print(f"   Command: {command}\n", file=sys.stderr)
                 
                 success, code = self.executor.execute(command)
                 
                 if not silent:
                     if success:
-                        print(f"\n✓ Command completed successfully", file=sys.stderr)
+                        print(f"\n Command completed successfully", file=sys.stderr)
                     else:
-                        print(f"\n⚠ Command exited with code {code}", file=sys.stderr)
+                        print(f"\n Command exited with code {code}", file=sys.stderr)
     
     def handle_run(self, cmd_id: int, dry_run: bool = False, 
                    silent: bool = False, shell_mode: bool = False):
@@ -56,7 +56,7 @@ class CLI:
             return True
         
         if not silent:
-            print(f"\n🚀 Running: {cmd['description']}", file=sys.stderr)
+            print(f"\n Running: {cmd['description']}", file=sys.stderr)
             print(f"   Command: {cmd['command']}\n", file=sys.stderr)
         
         if dry_run:
@@ -71,9 +71,9 @@ class CLI:
         
         if not silent:
             if success:
-                print(f"\n✓ Command completed successfully", file=sys.stderr)
+                print(f"\n Command completed successfully", file=sys.stderr)
             else:
-                print(f"\n⚠ Command exited with code {code}", file=sys.stderr)
+                print(f"\n Command exited with code {code}", file=sys.stderr)
         
         return success
     
@@ -113,18 +113,18 @@ class CLI:
                 from clipboard import copy
                 success, message = copy(cmd['command'])
                 if success:
-                    print(f"\n✓ {message}")
+                    print(f"\n {message}")
                 else:
-                    print(f"\n⚠ {message}")
+                    print(f"\n {message}")
         else:
             print(f"Command {cmd_id} not found.")
     
     def handle_delete(self, cmd_id: int):
         """Handle deleting a command."""
         if self.manager.delete(cmd_id):
-            print(f"✓ Command {cmd_id} deleted.")
+            print(f" Command {cmd_id} deleted.")
         else:
-            print(f"✗ Command {cmd_id} not found.")
+            print(f" Command {cmd_id} not found.")
     
     def handle_stats(self):
         """Handle showing statistics."""

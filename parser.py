@@ -95,6 +95,7 @@ def create_parser() -> argparse.ArgumentParser:
     run_parser.add_argument('id', type=int, help='Command ID to execute')
     run_parser.add_argument('--dry-run', action='store_true', help='Show what would be executed without running')
     run_parser.add_argument('-v', '--verbose', action='store_true', help='Show execution details (disable shell integration)')
+    run_parser.add_argument('--shell-mode', action='store_true', help=argparse.SUPPRESS)
     
     # Delete command
     delete_parser = subparsers.add_parser('delete', help='Delete a command by ID')
@@ -127,6 +128,7 @@ Usage:
   see search [query] [-t tag1 tag2]
   see list [-t tag1 tag2] [-n limit]
   see show <id>
+  see show <id> -c #to copy to clipboard
   see run <id> [--dry-run]
   see delete <id>
   see stats

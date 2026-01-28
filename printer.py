@@ -20,7 +20,7 @@ class CommandPrinter:
     @staticmethod
     def print_stats(stats: Dict):
         """Print statistics."""
-        print(f"\n📊 Statistics")
+        print(f"\n Statistics")
         print(f"   Total commands: {stats['total']}")
         print(f"   Unique tags: {stats['unique_tags']}")
         if stats['tags']:
