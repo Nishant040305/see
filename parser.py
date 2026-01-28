@@ -98,7 +98,7 @@ def create_parser() -> argparse.ArgumentParser:
     
     # Delete command
     delete_parser = subparsers.add_parser('delete', help='Delete a command by ID')
-    delete_parser.add_argument('id', type=int, help='Command ID to delete')
+    delete_parser.add_argument('id', type=int, nargs='+', help='Command ID(s) to delete')
 
     # Edit command
     edit_parser = subparsers.add_parser('edit', help='Edit a command by ID')

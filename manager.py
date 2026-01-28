@@ -82,14 +82,20 @@ class CommandManager:
         return None
     
     def delete(self, cmd_id: int) -> bool:
-        """Delete a command by ID. Returns True if deleted."""
+        """Delete a single command by ID. Returns True if deleted."""
+        return self.delete_multiple([cmd_id]) > 0
+
+    def delete_multiple(self, cmd_ids: List[int]) -> int:
+        """Delete multiple commands by ID. Returns number of deleted commands."""
         original_length = len(self.commands)
-        self.commands = [cmd for cmd in self.commands if cmd['id'] != cmd_id]
+        target_ids = set(cmd_ids)
+        self.commands = [cmd for cmd in self.commands if cmd['id'] not in target_ids]
         
-        if len(self.commands) < original_length:
+        deleted_count = original_length - len(self.commands)
+        if deleted_count > 0:
             self.storage.save(self.commands)
-            return True
-        return False
+            
+        return deleted_count
     
     def search(self, query: Optional[str] = None, tags: Optional[List[str]] = None) -> List[Dict]:
         """Search commands by query string or tags."""

@@ -21,7 +21,7 @@ see() {{
     else
         # It's 'run' or the 'add' syntax (which implies execution)
         # We capture the output and eval it
-        local cmd_output=$(command {script_path} "$@" 2>/dev/null)
+        local cmd_output=$(command {script_path} "$@")
         if [[ -n "$cmd_output" ]]; then
             eval "$cmd_output"
         fi
@@ -39,7 +39,7 @@ function see
         command {script_path} $argv
     else
         # Capture output and eval
-        set -l cmd_output (command {script_path} $argv 2>/dev/null)
+        set -l cmd_output (command {script_path} $argv)
         if test -n "$cmd_output"
             eval $cmd_output
         end

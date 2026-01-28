@@ -122,12 +122,20 @@ class CLI:
         else:
             print(f"Command {cmd_id} not found.")
     
-    def handle_delete(self, cmd_id: int):
-        """Handle deleting a command."""
-        if self.manager.delete(cmd_id):
-            print(f" Command {cmd_id} deleted.")
+    def handle_delete(self, cmd_ids: List[int]):
+        """Handle deleting one or more commands."""
+        # Ensure cmd_ids is a list (in case it's passed as single int)
+        if isinstance(cmd_ids, int):
+            cmd_ids = [cmd_ids]
+            
+        count = self.manager.delete_multiple(cmd_ids)
+        if count > 0:
+            if count == 1:
+                print(f" Command deleted.")
+            else:
+                print(f" {count} commands deleted.")
         else:
-            print(f" Command {cmd_id} not found.")
+            print(f" No commands found to delete.")
 
     def handle_edit(self, cmd_id: int, description: Optional[str] = None, tags: Optional[List[str]] = None):
         """Handle editing a command."""

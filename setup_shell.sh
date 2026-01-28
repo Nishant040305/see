@@ -55,7 +55,7 @@ see() {
     else
         # It's 'run' or the 'add' syntax (which implies execution)
         # We capture the output and eval it
-        local cmd_output=\$(command $SEE_SCRIPT "\$@" 2>/dev/null)
+        local cmd_output=\$(command $SEE_SCRIPT "\$@")
         if [[ -n "\$cmd_output" ]]; then
             eval "\$cmd_output"
         fi
