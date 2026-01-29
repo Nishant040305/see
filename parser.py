@@ -1,6 +1,7 @@
 """Argument parsing and command routing."""
 
 import argparse
+import shlex
 import sys
 from typing import List, Dict, Optional
 
@@ -58,7 +59,7 @@ def parse_add_syntax(args_list: List[str]) -> Optional[Dict]:
         return {
             'description': description,
             'tags': tags,
-            'command': ' '.join(command_parts),
+            'command': shlex.join(command_parts),
             'save_only': save_only,
             'shell_mode': shell_mode
         }
