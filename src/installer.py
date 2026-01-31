@@ -1,6 +1,7 @@
 """Shell integration installer."""
 
 import os
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -87,11 +88,26 @@ def handle_install(shell: Optional[str] = None, script_path: Optional[str] = Non
         print(f"Unsupported shell: {shell}")
         return
     
-    print(f"\n🔧 Installing SEE shell integration for {shell}...")
-    print(f"\nAdd the following to your {config_file}:\n")
-    print("=" * 60)
-    print(wrapper)
-    print("=" * 60)
-    print(f"\nThen run: source {config_file}")
-    print("\nOr, to install automatically, run:")
-    print(f"  see install {shell} >> {config_file} && source {config_file}")
+    print(f"\nInstalling SEE shell integration for {shell}...", file=sys.stderr)
+    
+    # Check if we can write to the file
+    try:
+        # Read existing content to check for duplicates
+        if config_file.exists():
+            content = config_file.read_text()
+            if "see()" in content and "# SEE Command Helper" in content:
+                print(f"Shell integration already appears to be installed in {config_file}", file=sys.stderr)
+                print(f"\nTo reinstall, remove the 'see()' function and try again.", file=sys.stderr)
+                return
+
+        # Append to the config file
+        with open(config_file, "a") as f:
+            f.write("\n" + wrapper + "\n")
+            
+        print(f" Successfully added shell integration to {config_file}", file=sys.stderr)
+        print(f"\nTo activate it now, run:\n  source {config_file}", file=sys.stderr)
+        
+    except Exception as e:
+        print(f"Error writing to {config_file}: {e}", file=sys.stderr)
+        print("\nPlease add the following manually:\n", file=sys.stderr)
+        print(wrapper)
