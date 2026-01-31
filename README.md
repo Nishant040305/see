@@ -20,7 +20,7 @@ The easiest way to install is using the RPM package, which automatically handles
 1. Download the latest `.rpm` from the [Releases page](https://github.com/Nishant040305/see/releases).
 2. Install it:
 ```bash
-sudo dnf install ./see-0.1.0-1.fc43.noarch.rpm
+sudo dnf install see-0.1.0-1.fc43.noarch.rpm
 ```
 3. Open a new terminal. The `see` command (and its shell integration like `cd/export`) will work immediately!
 
