@@ -3,7 +3,7 @@
 
 function see
     # List of subcommands and flags that just show information
-    set -l info_cmds list search show delete stats install help -h --help interactive import i tags
+    set -l info_cmds list search show delete stats install help -h --help interactive import i tags alias edit
     
     if test (count $argv) -eq 0; or contains -- $argv[1] $info_cmds
         # Just run normally

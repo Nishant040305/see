@@ -10,6 +10,7 @@ def parse_add_syntax(args_list: List[str]) -> Optional[Dict]:
     """Parse the custom add syntax: see -d 'desc' -t tag1 tag2 -c <command>"""
     description = None
     tags = []
+    alias = None
     save_only = False
     shell_mode = True  # Enable shell mode by default for quiet execution
     command_parts = []
@@ -39,6 +40,13 @@ def parse_add_syntax(args_list: List[str]) -> Optional[Dict]:
         elif arg in ['-s', '--save-only']:
             save_only = True
             i += 1
+        elif arg in ['-a', '--alias']:
+            if i + 1 < len(args_list):
+                alias = args_list[i + 1]
+                i += 2
+            else:
+                print("Error: -a requires an alias name", file=sys.stderr)
+                return None
         elif arg in ['-v', '--verbose']:
             shell_mode = False  # Disable shell mode (show output)
             i += 1
@@ -53,12 +61,13 @@ def parse_add_syntax(args_list: List[str]) -> Optional[Dict]:
     if description is not None:
         if not command_parts:
             print("Error: No command specified.", file=sys.stderr)
-            print("Usage: see -d 'description' -t tag1 tag2 -c <command>", file=sys.stderr)
+            print("Usage: see -d 'description' -t tag1 tag2 [-a alias] -c <command>", file=sys.stderr)
             return None
         
         return {
             'description': description,
             'tags': tags,
+            'alias': locals().get('alias'),
             'command': shlex.join(command_parts),
             'save_only': save_only,
             'shell_mode': shell_mode
@@ -131,6 +140,11 @@ def create_parser() -> argparse.ArgumentParser:
     install_parser.add_argument('shell', nargs='?', choices=['bash', 'zsh', 'fish'], 
                                help='Shell to install for (auto-detected if not specified)')
     
+    # Alias command
+    alias_parser = subparsers.add_parser('alias', help='Assign alias to a command')
+    alias_parser.add_argument('id', type=int, help='Command ID')
+    alias_parser.add_argument('-a', '--alias', required=True, help='Alias name')
+
     return parser
 
 
@@ -141,10 +155,10 @@ SEE - CLI Command Helper: Save and search your CLI commands
 
 Usage:
   # Add and execute a command (default)
-  see -d "description" -t tag1 tag2 -c <command>
+  see -d "description" -t tag1 tag2 [-a alias] -c <command>
   
   # Add without executing
-  see -s -d "description" -t tag1 tag2 -c <command>
+  see -s -d "description" -t tag1 tag2 [-a alias] -c <command>
   
   # Subcommands
   see search [query] [-t tag1 tag2]
@@ -153,8 +167,11 @@ Usage:
   see show <id> -c #to copy to clipboard
   see run <id> [--dry-run]
   see edit <id> [-d description] [-t tags]
+  see edit <id> [-d description] [-t tags]
   see delete <id>
   see stats
+  see alias <id> -a <alias>
+  see <alias>
   see install [bash|zsh|fish]
 
 Examples:
@@ -165,12 +182,15 @@ Examples:
   see search docker
   see list -t git
   see run 3
+  see alias 3 -a mycmd
+  see mycmd
   see stats
   see install
 
 Options:
   -d, --description    Description of the command (required for add)
   -t, --tags          Tags for categorization (space-separated)
+  -a, --alias         Alias name (for 'add' or 'alias' subcommand)
   -c, --command       Marks the start of the command (everything after is the command)
   -s, --save-only     Save without executing (default is to execute)
   -v, --verbose       Show execution details (disable quiet shell mode)

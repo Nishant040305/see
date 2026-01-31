@@ -16,6 +16,8 @@ class CommandPrinter:
         print(f"    Command: {cmd['command']}")
         if tags_str:
             print(f"    Tags: {tags_str}")
+        if cmd.get('alias'):
+            print(f"    Alias: {cmd['alias']}")
         if verbose:
             print(f"    Used: {cmd.get('used_count', 0)} times")
     
@@ -45,16 +47,17 @@ class CommandPrinter:
         term_width = shutil.get_terminal_size((120, 20)).columns
         
         id_width = 4
+        alias_width = 10
         desc_width = 25
         tags_width = 20
         # Remaining width for command (accounting for separators ' | ' and padding)
-        # Separators: 3 * 3 chars = 9 chars approx
+        # Separators: 4 * 2 chars = 8 chars approx
         # Margins: 2 chars
-        static_width = id_width + desc_width + tags_width + 12
-        cmd_width = max(30, term_width - static_width)
+        static_width = id_width + alias_width + desc_width + tags_width + 12
+        cmd_width = max(25, term_width - static_width)
         
-        headers = ["ID", "Description", "Command", "Tags"]
-        widths = [id_width, desc_width, cmd_width, tags_width]
+        headers = ["ID", "Alias", "Description", "Command", "Tags"]
+        widths = [id_width, alias_width, desc_width, cmd_width, tags_width]
         
         # Print header
         header_row = ""
@@ -71,6 +74,7 @@ class CommandPrinter:
             # Wrap content
             col_data = [
                 str(cmd['id']),
+                cmd.get('alias') or "",
                 cmd['description'] or "",
                 cmd['command'],
                 tags_str

@@ -7,9 +7,10 @@ A simple, powerful tool to save, search, and manage your frequently used CLI com
 - 💾 **Save commands** with descriptions and tags
 - 🔍 **Search** through your command history
 - 🏷️ **Tag-based organization**
+- 🔖 **Aliases** - Assign memorable names to commands (e.g., `see myls`)
 - 📊 **Usage statistics**
 - 🐚 **Shell integration** - Commands like `export` affect your current shell!
-- ⚡ **Quick execution** - Run saved commands by ID
+- ⚡ **Quick execution** - Run saved commands by ID or Alias
 
 ## Installation
 
@@ -108,7 +109,7 @@ source ~/.bashrc  # or ~/.zshrc or ~/.config/fish/config.fish
 
 **Basic syntax:**
 ```bash
-see -d "description" -t tag1 tag2 -c <command>
+see -d "description" -t tag1 tag2 [-a alias] -c <command>
 ```
 
 **Examples:**
@@ -123,7 +124,9 @@ see -d "Set HTTP proxy" -t proxy network -c export https_proxy=http://proxy:3128
 see -s -d "Dangerous command" -t system -c rm -rf /tmp/*
 
 # Save a git command
-see -d "Git log pretty" -t git log -c git log --oneline --graph --all
+# Save a git command with an alias
+see -d "Git log pretty" -t git log -a glog -c git log --oneline --graph --all
+
 ```
 
 ### Running Saved Commands
@@ -132,8 +135,26 @@ see -d "Git log pretty" -t git log -c git log --oneline --graph --all
 # Run by ID
 see run 1
 
+# Run by Alias (requires shell integration)
+see my_alias
+
 # Dry run (show what would be executed)
 see run 1 --dry-run
+```
+
+### Using Aliases
+
+You can assign a short, memorable alias to any command.
+
+```bash
+# Assign alias 'myls' to command ID 5
+see alias 5 -a myls
+
+# Run the alias
+see myls
+```
+
+Aliases are validated to prevent conflicts with system commands (like `ls`, `cd`, `grep`) and `see` subcommands.
 ```
 
 ### Searching Commands
@@ -174,6 +195,9 @@ see show 3 -c
 # Delete a command
 see delete 5
 
+# Assign an alias
+see alias 5 -a mycmd
+
 # Show statistics
 see stats
 ```
@@ -210,6 +234,13 @@ With shell integration:
 ```bash
 see run 1  # Runs: export VAR=value
 echo $VAR  # value (command ran in current shell!)
+```
+
+This also applies to **Aliases**:
+```bash
+see my_export_alias
+echo $VAR  # Works!
+```
 ```
 
 The shell wrapper:

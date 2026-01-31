@@ -28,7 +28,7 @@ def main():
     cli = CLI(manager, executor, printer)
     
     # Check if this is a subcommand
-    subcommands = ['search', 'list', 'show', 'run', 'delete', 'stats', 'install', 'edit', 'tags', 'interactive', 'i', 'import']
+    subcommands = ['search', 'list', 'show', 'run', 'delete', 'stats', 'install', 'edit', 'tags', 'interactive', 'i', 'import', 'alias']
     
     if len(sys.argv) > 1 and sys.argv[1] in subcommands:
         # Handle subcommands
@@ -61,6 +61,8 @@ def main():
                 file_path=args.file,
                 no_filter=args.no_filter
             )
+        elif args.command == 'alias':
+            cli.handle_alias(args.id, args.alias)
         elif args.command == 'install':
             # Get the path to this script for the installer
             script_path = str(Path(__file__).resolve())
@@ -68,19 +70,54 @@ def main():
     else:
         # Parse add syntax
         result = parse_add_syntax(sys.argv[1:])
-        if result is None:
-            print_help(file=sys.stderr)
-        elif result.get('help'):
-            print_help()
-        else:
+        
+        if result and not result.get('help'):
             cli.handle_add(
                 description=result['description'],
                 tags=result['tags'],
                 command=result['command'],
                 save_only=result['save_only'],
                 silent=True,
-                shell_mode=result.get('shell_mode', False)
+                shell_mode=result.get('shell_mode', False),
+                alias=result.get('alias')
             )
+        elif result and result.get('help'):
+            print_help()
+        else:
+            # Check if this is an alias execution
+            # Only if result is None (invalid add command)
+            potential_alias = sys.argv[1]
+            cmd = manager.get_by_alias(potential_alias)
+            
+            if cmd:
+                # Check flags
+                args = sys.argv[2:]
+                copy_flag = '-c' in args or '--copy' in args
+                show_flag = '-s' in args or '--show' in args
+                
+                if copy_flag:
+                    cli.handle_show(cmd['id'], copy_to_clipboard=True)
+                elif show_flag:
+                    cli.handle_show(cmd['id'], copy_to_clipboard=False)
+                else:
+                    # Run it
+                    # Collect extra args to pass to the command if needed?
+                    # The requirement "see alias" implies direct execution.
+                    # But maybe "see alias arg1 arg2"?
+                    # For now just simple execution.
+                    cli.handle_run(cmd['id'], shell_mode=True)
+            else:
+                # If we printed an error in parse_add_syntax, this might be redundant, 
+                # but usually parse_add_syntax is silent if it just didn't find flags.
+                # However, if it printed "Error: ...", we might print usage again.
+                # To distinguish, we could check if sys.argv[1] started with -.
+                if not sys.argv[1].startswith('-'):
+                    print(f"Command or alias '{sys.argv[1]}' not found.", file=sys.stderr)
+                    print_help(file=sys.stderr)
+                else:
+                    # It looked like a flag but failed parsing
+                    # parsing already printed error
+                    print_help(file=sys.stderr)
 
 
 if __name__ == '__main__':

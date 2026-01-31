@@ -19,10 +19,15 @@ class CLI:
         self.printer = printer
     
     def handle_add(self, description: str, tags: List[str], command: str, 
-                   save_only: bool = False, silent: bool = False, shell_mode: bool = False):
+                   save_only: bool = False, silent: bool = False, shell_mode: bool = False,
+                   alias: Optional[str] = None):
         """Handle adding and optionally executing a command."""
-        cmd = self.manager.add(command, description, tags)
-        
+        try:
+            cmd = self.manager.add(command, description, tags, alias=alias)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return
+            
         if not silent:
             if cmd.get('updated'):
                 action = "Merged tags for" if cmd.get('merged_tags') else "Already exists:"
@@ -160,6 +165,19 @@ class CLI:
             self.printer.print_command(cmd)
         else:
             print(f"Command {cmd_id} not found.")
+
+    def handle_alias(self, cmd_id: int, alias: str):
+        """Handle assigning an alias to a command."""
+        try:
+            cmd = self.manager.edit(cmd_id, alias=alias)
+            if cmd:
+                print(f"Alias '{alias}' assigned to command {cmd_id}.")
+                self.printer.print_command(cmd)
+            else:
+                print(f"Command {cmd_id} not found.", file=sys.stderr)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+
     
     def handle_stats(self):
         """Handle showing statistics."""
