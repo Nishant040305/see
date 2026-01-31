@@ -2,10 +2,13 @@
 
 import sys
 from typing import List, Optional
-from manager import CommandManager
-from executor import CommandExecutor
-from printer import CommandPrinter
-
+from .manager import CommandManager
+from .executor import CommandExecutor
+from .printer import CommandPrinter
+from .variables import find_placeholders, substitute_positional, prompt_for_values, substitute
+from .tui import interactive_select
+from .importer import get_history_file, read_history, filter_trivial
+from pathlib import Path
 
 class CLI:
     """Command-line interface handler."""
@@ -48,9 +51,7 @@ class CLI:
     def handle_run(self, cmd_id: int, dry_run: bool = False, 
                    silent: bool = False, shell_mode: bool = False,
                    args: Optional[List[str]] = None):
-        """Handle running a saved command."""
-        from variables import find_placeholders, substitute_positional, prompt_for_values, substitute
-        
+        """Handle running a saved command."""        
         cmd = self.manager.get(cmd_id)
         if not cmd:
             print(f"✗ Command {cmd_id} not found.", file=sys.stderr)
@@ -182,7 +183,6 @@ class CLI:
 
     def handle_interactive(self, shell_mode: bool = False):
         """Handle interactive command selection."""
-        from tui import interactive_select
         
         commands = self.manager.search()  # Get all commands
         if not commands:
@@ -199,10 +199,7 @@ class CLI:
 
     def handle_import(self, from_history: bool = False, lines: int = 50, 
                      file_path: Optional[str] = None, no_filter: bool = False):
-        """Handle importing commands from history or file."""
-        from importer import get_history_file, read_history, filter_trivial
-        from pathlib import Path
-        
+        """Handle importing commands from history or file."""        
         # Determine source
         if file_path:
             source = Path(file_path)

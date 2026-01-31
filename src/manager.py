@@ -2,7 +2,7 @@
 
 from typing import List, Dict, Optional
 from datetime import datetime
-from storage import CommandStorage
+from .storage import CommandStorage
 
 
 class CommandManager:

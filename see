@@ -8,14 +8,14 @@ import sys
 from pathlib import Path
 
 # Import from same directory
-from config import COMMANDS_FILE
-from storage import CommandStorage
-from manager import CommandManager
-from executor import CommandExecutor
-from printer import CommandPrinter
-from cli import CLI
-from parser import create_parser, parse_add_syntax, print_help
-from installer import handle_install
+from src.config import COMMANDS_FILE
+from src.storage import CommandStorage
+from src.manager import CommandManager
+from src.executor import CommandExecutor
+from src.printer import CommandPrinter
+from src.cli import CLI
+from src.parser import create_parser, parse_add_syntax, print_help
+from src.installer import handle_install
 
 
 def main():
