@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        CLI Command Helper
 
 License:        MIT
-URL:            https://github.com/example/see-helper
+URL:            https://github.com/Nishant040305/see
 Source0:        %{name}-%{version}.tar.gz
 
 BuildArch:      noarch

@@ -24,15 +24,19 @@ echo "Created ${TAR_NAME}"
 rm -rf "${DIR_NAME}"
 
 # Move to RPM sources
-DEST="$HOME/rpmbuild/SOURCES/${TAR_NAME}"
-if [ -d "$HOME/rpmbuild/SOURCES" ]; then
-    cp "${TAR_NAME}" "$DEST"
-    echo "Copied to $DEST"
+DEST_SOURCE="$HOME/rpmbuild/SOURCES/${TAR_NAME}"
+DEST_SPEC="$HOME/rpmbuild/SPECS/${NAME}.spec"
+
+if [ -d "$HOME/rpmbuild/SOURCES" ] && [ -d "$HOME/rpmbuild/SPECS" ]; then
+    cp "${TAR_NAME}" "$DEST_SOURCE"
+    cp "${NAME}.spec" "$DEST_SPEC"
+    echo "Copied source to $DEST_SOURCE"
+    echo "Copied spec to $DEST_SPEC"
+    rm "${TAR_NAME}"
+    echo ""
+    echo "Now you can run:"
+    echo "rpmbuild -ba ~/rpmbuild/SPECS/see.spec"
 else
     echo "RPM sources directory not found at $HOME/rpmbuild/SOURCES"
     echo "   You may need to run: rpmdev-setuptree"
 fi
-
-echo ""
-echo "Now you can run:"
-echo "rpmbuild -ba ~/rpmbuild/SPECS/see.spec"
